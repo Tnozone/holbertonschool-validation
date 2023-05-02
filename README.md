@@ -1,1 +1,5 @@
 # holbertonschool-validation
+
+## Prerequisites
+
+## Lifecycle

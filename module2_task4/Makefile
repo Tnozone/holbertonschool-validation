@@ -8,7 +8,7 @@ clean: ## Cleanup the content of the directory dist/
 
 post: ## Create a new blog post whose filename and title come from the environment variables POST_TITLE and POST_NAME.
 	hugo new posts/$(POST_NAME).md
-	sed -i 's/title: .*/title:"$(POST_TITLE)"/' content/posts/$(POST_NAME).md
+	sed -i 's/title:.*/title:"$(POST_TITLE)"/' content/posts/$(POST_NAME).md
 
 check: ## Succeed by default, and fail when presented with a dead link or a badly written Markdown file
 	markdownlint README.md content/posts/*

@@ -35,7 +35,7 @@ func Test_HelloHandler(t *testing.T) {
 			queryString:  "",
 			responseCode: 200,
 			body:         "Hello Telephone!",
-		}
+		},
 		{
 			name:         "",
 			queryString:  "name=",

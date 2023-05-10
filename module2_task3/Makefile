@@ -13,7 +13,7 @@ stop: ## Stop the application with the command kill XXXXX where XXXXX is the Pro
 
 clean: ## Stop the application. Delete the binary awesome-api and the log file awesome-api.log
 	pkill awesome-api || true
-	rm awesome-api awesome-api.log
+	rm awesome-api awesome-api.log coverage*
 
 test: ## ou want to test it to ensure that it behaves as expected
 	go test -v -short -coverprofile=coverage-units.out

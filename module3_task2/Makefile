@@ -47,5 +47,8 @@ check:	## Lint markdonw source, check dead links
 validate:	## Validate the file dist/index.html using the command line Holberton’s W3C Validator.
 	python3 /opt/W3C-Validator/w3c_validator.py ./dist/index.html || true
 
+package:   ## Produces a file awesome-website.zip, containing the binary awesome-api and the directory dist/ directory
+	zip awesome-website.zip awesome-api dist/*
+
 help:	## Show this help usage.
 	@sed -ne '/@sed/!s/## //p' $(MAKEFILE_LIST)

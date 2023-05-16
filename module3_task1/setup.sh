@@ -8,7 +8,7 @@ mv hugo /usr/local/bin
 
 # Install golangci-lint
 curl --silent --show-error --location --output /tmp/golangci-lint.deb \
-	     "https://github.com/golangci/golangci-lint/releases/download/v1.52.2/golangci-lint-1.52.2-linux-amd64.deb"
+	"https://github.com/golangci/golangci-lint/releases/download/v1.52.2/golangci-lint-1.52.2-linux-amd64.deb"
 sudo dpkg -i /tmp/golangci-lint.deb
 rm -f /tmp/golangci-lint.deb
 

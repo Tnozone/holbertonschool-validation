@@ -1,0 +1,70 @@
+---
+name: module3_task5
+# Events that trigger workflows
+on:  # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 0 * * *'
+  pull_request:
+    types: [opened, reopened, edited, ready_for_review]
+jobs:
+  build:
+    permissions:
+      contents: write
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout  # Download code from the repository
+        uses: actions/checkout@v3
+
+      - name: Run file sh
+        run: cd module3_task5 && ./setup.sh
+
+      - name: Run make build
+        run: cd module3_task5 && make build
+
+      - name: Run make lint
+        run: cd module3_task5 && make lint
+
+      - name: Run make validate
+        run: cd module3_task5 && make validate
+
+      - name: Test
+        run: |
+          cd module3_task5
+          make integration-tests
+          make unit-tests
+          make package
+          make clean
+
+      - name: Release
+        env:
+          TOKEN: ${{ secrets.TOKEN }}
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: 1.0.1
+          files: |
+            module3_task5/awesome-website.zip
+            module3_task5/DEPLOY.md
+
+      - name: Archive build
+        uses: actions/upload-artifact@v3
+        with:
+          name: "upload package"
+          path: module3_task5/awesome-website.zip
+
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v2.0
+        with:
+          publish-dir: './dist'
+          production-branch: main
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "🎉 Published on $(date) 🚀 Deployed on $(date)"
+          enable-pull-request-comment: false
+          enable-commit-comment: true
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 1

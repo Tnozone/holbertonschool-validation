@@ -1,0 +1,57 @@
+---
+name: module4_task1
+run-name: module4_task1
+on:  # yamllint disable-line rule:truthy
+  push:
+  schedule:
+    - cron: '0 0 * * *'
+  pull_request:
+    types: [opened, reopened, edited, ready_for_review]
+jobs:
+  first_job:
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: ./${{ github.workflow }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Clone the repo
+        uses: actions/checkout@v3
+      - name: install missing tools for building
+        run: ./setup.sh
+      - name: Build the hugo website via the target build.
+        run: make build
+      - name: Integration tests
+        run: |
+          make validate
+          make integration-tests
+          make unit-tests
+          make package
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: 1.0.1
+          files: |
+            ${{ github.workflow }}/awesome-website.zip
+            ${{ github.workflow }}/DEPLOY.md
+      - name: archive build
+        if: ${{ success()}}
+        uses: actions/upload-artifact@v3
+        with:
+          name: upload-package
+          path: ${{ github.workflow }}/awesome-website.zip
+      - name: deploy
+        uses: nwtgck/actions-netlify@v2.0
+        with:
+          publish-dir: './${{ github.workflow }}/dist'
+          production-branch: master
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: 'Published on'
+          enable-pull-request-comment: true
+          enable-commit-comment: true
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 1

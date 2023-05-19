@@ -1,66 +1,54 @@
+---
 name: module4_task0
-# Events that trigger workflows
+run-name: module4_task0
 on:  # yamllint disable-line rule:truthy
   push:
-    branches:
-      - main
   schedule:
     - cron: '0 0 * * *'
   pull_request:
     types: [opened, reopened, edited, ready_for_review]
 jobs:
-  build:
+  first_job:
     permissions:
       contents: write
+    defaults:
+      run:
+        working-directory: ./${{ github.workflow }}
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout  # Download code from the repository
+      - name: Clone the repo
         uses: actions/checkout@v3
-
-      - name: Run file sh
-        run: cd module4_task0 && ./setup.sh
-
-      - name: Run make build
-        run: cd module4_task0 && make build
-
-      - name: Run make lint
-        run: cd module4_task0 && make lint
-
-      - name: Run make validate
-        run: cd module4_task0 && make validate
-
-      - name: Test
+      - name: install missing tools for building
+        run: ./setup.sh
+      - name: Build the hugo website via the target build.
+        run: make build
+      - name: Integration tests
         run: |
-          cd module4_task0
+          make validate
           make integration-tests
           make unit-tests
           make package
-          make clean
-
       - name: Release
-        env:
-          TOKEN: ${{ secrets.TOKEN }}
         uses: softprops/action-gh-release@v1
         with:
           tag_name: 1.0.1
           files: |
-            module4_task0/awesome-website.zip
-            module4_task0/DEPLOY.md
-
-      - name: Archive build
+            ${{ github.workflow }}/awesome-website.zip
+            ${{ github.workflow }}/DEPLOY.md
+      - name: archive build
+        if: ${{ success()}}
         uses: actions/upload-artifact@v3
         with:
-          name: "upload package"
-          path: module4_task0/awesome-website.zip
-
-      - name: Deploy to Netlify
+          name: upload-package
+          path: ${{ github.workflow }}/awesome-website.zip
+      - name: deploy
         uses: nwtgck/actions-netlify@v2.0
         with:
-          publish-dir: './dist'
-          production-branch: main
+          publish-dir: './${{ github.workflow }}/dist'
+          production-branch: master
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          deploy-message: "🎉 Published on $(date) 🚀 Deployed on $(date)"
-          enable-pull-request-comment: false
+          deploy-message: 'Published on'
+          enable-pull-request-comment: true
           enable-commit-comment: true
           overwrites-pull-request-comment: true
         env:
